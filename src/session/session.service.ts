@@ -10,4 +10,7 @@ import { users } from '../api/fixtures';
 @Injectable({ providedIn: 'root' })
 export class SessionService {
 	user: ReqUser = users.approver;
+	constructor() {
+		console.log(this.user);
+	}
 }

@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CrApiService } from '../../api/cr-api.service';
 import { SessionService } from '../../session/session.service';
 import { CrDetail, TimelineEntry } from '../../models/cr.models';
@@ -26,9 +26,9 @@ export class CrDetailComponent implements OnInit {
 	submitting = false;
 	actionError?: string;
 	// TODO: add validation so the form is invalid until a reason is entered.
-	rejectControl = new FormControl('', { nonNullable: true });
+	rejectControl = new FormControl('', { nonNullable: true, validators: [Validators.required] });
 
-	constructor(private readonly api: CrApiService, private readonly session: SessionService) {}
+	constructor(private readonly api: CrApiService, private readonly session: SessionService) { }
 
 	ngOnInit(): void {
 		void this.load();
@@ -56,13 +56,14 @@ export class CrDetailComponent implements OnInit {
 	/** Approval timeline, oldest-first. */
 	get timeline(): TimelineEntry[] {
 		// TODO: return the audit entries ordered chronologically (oldest first).
-		return this.detail?.audit ?? [];
+		return [...(this.detail?.audit ?? [])].sort((a, b) => a.at.localeCompare(b.at));
 	}
 
 	/** Whether the current user may approve the loaded CR. */
 	get canApprove(): boolean {
 		// NOTE: this only looks at the CR status. The UI must also respect the user's permissions.
-		return this.detail?.status === 'PENDING_APPROVAL';
+		return this.detail?.status === 'PENDING_APPROVAL' &&
+			this.session.user.policies.includes('cr_a_o');
 	}
 
 	get canReject(): boolean {
@@ -74,6 +75,15 @@ export class CrDetailComponent implements OnInit {
 	}
 
 	async approve(): Promise<void> {
+		if (!this.canApprove || !this.detail) return;
+
+		try {
+			// approve(user: ReqUser, id: string, at: string)
+			const result = await this.api.approve(this.session.user, this.detail.id, new Date().toISOString());
+		} catch (err) {
+			console.error(err);
+		}
+
 		// TODO: perform the approve action through the API and reflect the outcome in the view.
 		throw new Error('approve() not implemented');
 	}
@@ -81,6 +91,15 @@ export class CrDetailComponent implements OnInit {
 	async reject(): Promise<void> {
 		// TODO: require a valid rejectControl, then perform the reject action through the API and
 		//       reflect the outcome in the view.
+		if (!this.canReject || !this.detail) return;
+
+		try {
+			// reject(user: ReqUser, id: string, at: string, reason: string)
+			const result = await this.api.reject(this.session.user, this.detail.id, new Date().toISOString(),  this.rejectControl.value);
+		} catch (err) {
+			console.error(err);
+		}
+
 		throw new Error('reject() not implemented');
 	}
 }
