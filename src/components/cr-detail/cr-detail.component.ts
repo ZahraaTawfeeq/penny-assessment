@@ -67,7 +67,8 @@ export class CrDetailComponent implements OnInit {
 	}
 
 	get canReject(): boolean {
-		return this.detail?.status === 'PENDING_APPROVAL';
+		return this.detail?.status === 'PENDING_APPROVAL' &&
+			this.session.user.policies.includes('cr_a_o');
 	}
 
 	fmt(amount: number): string {
@@ -75,17 +76,16 @@ export class CrDetailComponent implements OnInit {
 	}
 
 	async approve(): Promise<void> {
+		// TODO: perform the approve action through the API and reflect the outcome in the view.
+
 		if (!this.canApprove || !this.detail) return;
 
 		try {
 			// approve(user: ReqUser, id: string, at: string)
-			const result = await this.api.approve(this.session.user, this.detail.id, new Date().toISOString());
+			await this.api.approve(this.session.user, this.detail.id, new Date().toISOString());
 		} catch (err) {
 			console.error(err);
 		}
-
-		// TODO: perform the approve action through the API and reflect the outcome in the view.
-		throw new Error('approve() not implemented');
 	}
 
 	async reject(): Promise<void> {
@@ -95,11 +95,9 @@ export class CrDetailComponent implements OnInit {
 
 		try {
 			// reject(user: ReqUser, id: string, at: string, reason: string)
-			const result = await this.api.reject(this.session.user, this.detail.id, new Date().toISOString(),  this.rejectControl.value);
+			await this.api.reject(this.session.user, this.detail.id, new Date().toISOString(), this.rejectControl.value);
 		} catch (err) {
 			console.error(err);
 		}
-
-		throw new Error('reject() not implemented');
 	}
 }
