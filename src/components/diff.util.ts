@@ -23,15 +23,18 @@ export function computeDiff(baseline: LineItem[], proposed: LineItem[]): DiffRow
 
 	for (const b of baseline) {
 		const p = proposedBySku.get(b.sku);
+		// removed
 		if (!p) {
 			rows.push({ sku: b.sku, kind: 'removed', baseline: b });
 			continue;
 		}
-		const changed = b.unitPrice !== p.unitPrice;
+		// changed)
+		const changed = b.unitPrice !== p.unitPrice || b.description !== p.description || b.quantity !== p.quantity;
 		rows.push({ sku: b.sku, kind: changed ? 'changed' : 'unchanged', baseline: b, proposed: p });
 	}
 	for (const p of proposed) {
 		if (!baselineBySku.has(p.sku)) {
+			// added
 			rows.push({ sku: p.sku, kind: 'added', proposed: p });
 		}
 	}
