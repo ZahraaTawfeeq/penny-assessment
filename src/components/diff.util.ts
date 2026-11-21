@@ -29,6 +29,7 @@ export function computeDiff(baseline: LineItem[], proposed: LineItem[]): DiffRow
 			continue;
 		}
 		// changed
+		// const changed = b.unitPrice !== p.unitPrice;
 		const changed = b.unitPrice !== p.unitPrice || b.description !== p.description || b.quantity !== p.quantity;
 		rows.push({ sku: b.sku, kind: changed ? 'changed' : 'unchanged', baseline: b, proposed: p });
 	}

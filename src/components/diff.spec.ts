@@ -21,4 +21,14 @@ describe('computeDiff', () => {
 		const rows = computeDiff(base, [{ ...base[0], quantity: 11 }, base[1]]);
 		expect(rows.find((r) => r.sku === 'SKU-A')?.kind).toBe('changed');
 	});
+
+	it('detects a description change', () => {
+		const rows = computeDiff(base, [{ ...base[0], description: 'Updated Widget A' }, base[1]]);
+		expect(rows.find((r) => r.sku === 'SKU-A')?.kind).toBe('changed');
+	});
+	
+	it('detects a unit price change', () => {
+		const rows = computeDiff(base, [{ ...base[0], unitPrice: 600 }, base[1]]);
+		expect(rows.find((r) => r.sku === 'SKU-A')?.kind).toBe('changed');
+	});
 });

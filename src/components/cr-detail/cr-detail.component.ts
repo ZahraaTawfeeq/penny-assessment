@@ -83,6 +83,7 @@ export class CrDetailComponent implements OnInit {
 		try {
 			// approve(user: ReqUser, id: string, at: string)
 			await this.api.approve(this.session.user, this.detail.id, new Date().toISOString());
+			
 		} catch (err) {
 			console.error(err);
 		}

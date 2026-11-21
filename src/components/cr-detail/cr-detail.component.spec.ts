@@ -31,4 +31,37 @@ describe('CrDetailComponent', () => {
 		const approveBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.cr-actions__approve');
 		expect(approveBtn.disabled).toBe(true);
 	});
+
+
+	it('hides Reject for a read-only viewer', async () => {
+		const fixture = await render(users.viewer, 'CR-1');
+
+		expect(fixture.nativeElement.querySelector('.cr-actions__reject-btn')).toBeNull();
+	});
+	
+	it('allows an authorized user to approve a pending CR', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+
+		expect(fixture.componentInstance.canApprove).toBe(true);
+	});
+
+	it('requires a rejection reason', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+		const rejectControl = fixture.componentInstance.rejectControl;
+
+		expect(rejectControl.invalid).toBe(true);
+
+		rejectControl.setValue('Incorrect quantity');
+
+		expect(rejectControl.valid).toBe(true);
+	});
+
+	it('displays audit entries in chronological order', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+		const timeline = fixture.componentInstance.timeline;
+
+		expect(timeline[0].at <= timeline[1].at).toBe(true);
+	});
+
+
 });
